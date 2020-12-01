@@ -1,0 +1,75 @@
+<?xml version = "1.0" encoding = "UTF-8"?>
+<!DOCTYPE mapper PUBLIC
+        "-//mybatis.org//DTD com.example.Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--namespace：用来区别不同的类的名字-->
+<mapper namespace="com.example.demo.mapper.UserMapper">
+
+     <!-- namespace:用来区别不同的类的名字
+    id:标识映射文件中的sql，称为statement的id将sql语句封装到mappedStatement对象中，所以将id称为statement的id
+    parameterType:指定输入参数的类型.
+    resultMap 要更强大一些 ，可自定义输出结果类型。mybatis将sql查询结果的一行记录数据映射为resultMap指定类型的对象。如果有多条数据，则分别进行映射，并把对象放到容器List中 -->
+
+        <resultMap id="result" type="com.example.demo.entity.User">
+            <result property="userId" column="userId" />
+            <result property="userCode" column="userCode" />
+            <result property="userName" column="userName" />
+            <result property="userAddress" column="userAddress" />
+            <result property="userPhone" column="userPhone" />
+            <result property="userIdcard" column="userIdcard" />
+            <result property="userStation" column="userStation" />
+        </resultMap>
+
+        <select id="ListUser" resultMap="result">
+            SELECT * FROM user_for_hotel
+        </select>
+
+	    <!-- 根据用户名模糊查询用户列表 -->
+        <select id="findUserByName" resultMap="result" parameterType="String">
+            SELECT * FROM user_for_hotel
+                where (userName like concat(concat('%',#{userName}),'%') or
+                userCode like concat(concat('%',#{userName}),'%') )
+                order by userId desc
+        </select>
+
+        <select id="queryPage" resultMap="result"  parameterType="Integer">
+            select * from user_for_hotel
+                order by userId desc
+                limit #{startRows},5
+        </select>
+
+        <select id="getRowCount" resultType="Integer">
+            select count(*) from user_for_hotel
+        </select>
+
+        <!--  添加用户  -->
+    <insert id="insertUser" parameterType="com.example.demo.entity.User">
+		INSERT INTO user_for_hotel
+		(
+		userId,userCode,userName,userAddress,userPhone,userIdcard,userStation
+		)
+		VALUES (
+		#{userId},
+		#{userCode, jdbcType=VARCHAR},
+		#{userName, jdbcType=VARCHAR},
+		#{userAddress, jdbcType=VARCHAR},
+        #{userPhone, jdbcType=VARCHAR},
+        #{userIdcard, jdbcType=VARCHAR},
+        #{userStation, jdbcType=VARCHAR}
+        )
+	</insert>
+
+	<!-- 删除用户
+	#{}:一个占位符。preparedStatement向占位符中设置值，自动进行java类型和jdbc类型转换。#{}可以有效防止sql注入。 #{}可以接收简单类型值或pojo属性值。 如果parameterType传输单个简单类型值，#{}括号中可以是value或其它名称。 -->
+    <delete id="delete" parameterType="int">
+		delete from user_for_hotel where userId=#{userId}
+	</delete>
+
+	<!-- 更新用户 -->
+    <update id="Update" parameterType="com.example.demo.entity.User">
+		update user_for_hotel user
+			set user.userCode=#{userCode},user.userName=#{userName},user.userAddress=#{userAddress},
+			user.userPhone=#{userPhone},user.userIdcard=#{userIdcard},user.userStation=#{userStation}
+			where user.userId=#{userId}
+	</update>
+</mapper>
